@@ -1,28 +1,27 @@
 #!/usr/bin/env python
 
-import grpc
-import xr_pb2
-import xr_pb2_grpc
+from cisco_xr_grpc import CiscoXRgRPC
 import json
 
 GRPC_ROUTER = "18.206.119.175"
-GRPC_PORT = 57400
 
 
 def main():
-    creds = [("username", "admin"), ("password", "admin")]
-    target = f"{GRPC_ROUTER}:{GRPC_PORT}"
-    path = {"Cisco-IOS-XR-ip-static-cfg:router-static": [None]}
 
-    print(f"Connecting to: {target}")
-    with grpc.insecure_channel(target) as channel:
-        conn = xr_pb2_grpc.gRPCConfigOperStub(channel)
+    # Dict that gets converted to a string (per protobuf) to identify the
+    # YANG data to collect
+    paths = {
+        "static": {"Cisco-IOS-XR-ip-static-cfg:router-static": [None]},
+        "vrf": {"Cisco-IOS-XR-infra-rsi-cfg:vrfs": [None]},
+        "bgp": {"Cisco-IOS-XR-ipv4-bgp-cfg:bgp": [None]},
+    }
 
-        responses = conn.GetConfig(
-            xr_pb2.ConfigGetArgs(yangpathjson=json.dumps(path)), metadata=creds
-        )
-        for response in responses:
-            print(json.loads(response.yangjson))
+    with CiscoXRgRPC(host=GRPC_ROUTER) as conn:
+        for name, path in paths.items():
+            print(f"\nCollecting {name} config:")
+            responses = conn.get_config(yangpathjson_dict=path)
+            for response in responses:
+                print(json.dumps(response, indent=2))
 
 
 if __name__ == "__main__":

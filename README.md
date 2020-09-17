@@ -6,10 +6,11 @@ Reference links:
   - https://grpc.io/docs/languages/python/quickstart
 
 TODO:
-  - build simple client
   - merge
   - replace
   - delete
+  - commit
   - telemetry
   - gNMI
   - PCAPs
+  - figure out what the [null] list is for ... deeper YANG paths?
