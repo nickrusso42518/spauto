@@ -1,0 +1,52 @@
+{
+  "vrf": [
+    {
+      "vrf-name": "C",
+      "afs": {
+        "af": [
+          {
+            "af-name": "ipv4",
+            "saf-name": "unicast",
+            "topology-name": "default",
+            "Cisco-IOS-XR-ipv4-bgp-cfg:bgp": {
+              "import-route-targets": {
+                "route-targets": {
+                  "route-target": [
+                    {
+                      "type": "as",
+                      "as-or-four-byte-as": [
+                        {
+                          "as-xx": 0,
+                          "as": 3,
+                          "as-index": 3,
+                          "stitching-rt": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "export-route-targets": {
+                "route-targets": {
+                  "route-target": [
+                    {
+                      "type": "as",
+                      "as-or-four-byte-as": [
+                        {
+                          "as-xx": 0,
+                          "as": 3,
+                          "as-index": 3,
+                          "stitching-rt": 0
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

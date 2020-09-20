@@ -5,8 +5,14 @@ import gnmi_pb2
 import grpc
 import json
 
-GRPC_ROUTER = "18.206.119.175"
-#GRPC_ROUTER = "10.10.20.70"
+#GRPC_ROUTER = "18.206.119.175"
+GRPC_ROUTER = "10.10.20.50"  #devbox
+GRPC_PORT = 5740
+
+#creds = [("username", "admin"), ("password", "admin")]
+creds = [("username", "admin"), ("password", "Cisco123")]
+
+tele_path = "Cisco-IOS-XR-telemetry-model-driven-oper:telemetry-model-driven/destinations/destination"
 
 
 def main():
@@ -16,32 +22,39 @@ def main():
     get_request = make_get_request(path_str)
     print(get_request)
 
-    set_request = make_set_request(path_str, {"k": "v"})
-    print(set_request)
-    set_request = make_set_request(path_str, {"k": "v"}, operation="replace")
-    print(set_request)
-    set_request = make_set_request(path_str, operation="delete")
-    print(set_request)
+    with open("../json_config/vrf_c_gnmi.json", "r") as handle:
+        vrf_c = json.load(handle)
+
+    update_request = make_set_request(path_str, vrf_c)
+    print(update_request)
+    replace_request = make_set_request(path_str, vrf_c, operation="replace")
+    print(replace_request)
+    delete_request = make_set_request(path_str, operation="delete")
+    print(delete_request)
 
     capability_request = make_capability_request()
     print(capability_request)
 
-    subscription_request = make_subscribe_request(path_str)
+    subscription_request = make_subscribe_request(tele_path)
     print(subscription_request)
-    return
 
-    creds = [("username", "admin"), ("password", "admin")]
-    channel = grpc.insecure_channel(f"{GRPC_ROUTER}:57400")
+    channel = grpc.insecure_channel(f"{GRPC_ROUTER}:{GRPC_PORT}")
     stub = gnmi_pb2_grpc.gNMIStub(channel)
 
-    data = stub.Capabilities(capability_request, metadata=creds)
-    print(data)
+    #data = stub.Capabilities(capability_request, metadata=creds)
+    #print(data)
 
-    data = stub.Get(get_request, metadata=creds)
-    print(data)
+    #data = stub.Get(get_request, metadata=creds)
+    #print(data)
 
-    data = stub.Set(set_request, metadata=creds)
-    print(data)
+    #data = stub.Set(delete_request, metadata=creds)
+    #print(data)
+
+    stream = (n for n in [subscription_request])
+    data = stub.Subscribe(stream, metadata=creds)
+    for segment in data:
+        print(data)
+
 
        
 def make_path(path_str):
@@ -80,7 +93,7 @@ def make_subscribe_request(path_str):
     subscription = gnmi_pb2.Subscription(path=make_path(path_str),
         mode=2, sample_interval=10000000000, suppress_redundant=False)
     subscription_list = gnmi_pb2.SubscriptionList(subscription=[subscription],
-        mode=0, encoding=4)
+        mode=0, encoding=2)
     subscribe_request = gnmi_pb2.SubscribeRequest(subscribe=subscription_list)
     return subscribe_request
 
